@@ -8,6 +8,11 @@ variable "availability_zone" {
   default = ""
 }
 
+variable "map_public_ip_on_launch" {
+  type = bool
+  default = false
+}
+
 variable "tags" {
     type = map(any)
     default = {
