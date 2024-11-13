@@ -11,3 +11,10 @@ variable "scan_on_push" {
   # default     = ""
   type = bool
 }
+
+variable "tags" {
+    type = map(any)
+    default = {
+        Author : "Terraform"
+    }
+}
