@@ -108,5 +108,5 @@ variable "tags" {
 
 variable "environment_variables" {
   type    = map(string)
-  default = null
+  default = {}
 }
