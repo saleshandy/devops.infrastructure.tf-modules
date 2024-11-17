@@ -5,20 +5,19 @@ variable "capacity_providers" {
   default     = ["FARGATE", "FARGATE_SPOT"]
 }
 
-variable "capacity_provider_strategy" {
-  description = "The default capacity provider strategy for the ECS cluster."
-  type = list(object({
-    base              = number
-    weight            = number
-    capacity_provider = string
-  }))
-  default = [
-    {
-      base              = 1
-      weight            = 100
-      capacity_provider = "FARGATE"
-    }
-  ]
+variable "base" {
+  type = number
+  default = 1
+}
+
+variable "weight" {
+  type = number
+  default = 100
+}
+
+variable "capacity_provider" {
+  type = string
+  default = "FARGATE"
 }
 
 variable "cluster" {
