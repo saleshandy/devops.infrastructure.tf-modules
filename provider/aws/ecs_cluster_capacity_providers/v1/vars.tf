@@ -7,16 +7,18 @@ variable "capacity_providers" {
 
 variable "capacity_provider_strategy" {
   description = "The default capacity provider strategy for the ECS cluster."
-  type = object({
+  type = list(object({
     base              = number
     weight            = number
     capacity_provider = string
-  })
-  default = {
-    base              = 1
-    weight            = 100
-    capacity_provider = "FARGATE"
-  }
+  }))
+  default = [
+    {
+      base              = 1
+      weight            = 100
+      capacity_provider = "FARGATE"
+    }
+  ]
 }
 
 variable "cluster" {
