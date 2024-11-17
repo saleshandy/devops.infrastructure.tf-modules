@@ -3,12 +3,5 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 
   capacity_providers = var.capacity_providers
 
-  dynamic "default_capacity_provider_strategy" {
-    for_each = var.capacity_provider_strategy
-    content {
-      base              = each.key.base
-      weight            = each.key.weight
-      capacity_provider = each.key.capacity_provider
-    }
-  }
+  default_capacity_provider_strategy = var.default_capacity_provider_strategy
 }
