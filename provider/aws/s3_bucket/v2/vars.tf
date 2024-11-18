@@ -61,3 +61,10 @@ variable "error_document" {
 variable "routing_rules" {
   default = ""
 }
+
+variable "tags" {
+    type = map(any)
+    default = {
+        Author : "Terraform"
+    }
+}

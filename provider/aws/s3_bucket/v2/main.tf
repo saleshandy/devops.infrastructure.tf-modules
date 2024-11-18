@@ -23,6 +23,8 @@ resource "aws_s3_bucket" "main" {
       routing_rules = var.routing_rules
     }
   }
+
+  tags = "${var.tags}"
 }
 
 resource "aws_s3_bucket_versioning" "main" {

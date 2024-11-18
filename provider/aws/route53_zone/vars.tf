@@ -12,11 +12,11 @@ variable "comment" {
   type = string
   default     = ""
 }
+
 variable "tags" {
     type = map(any)
     default = {
         Author : "Terraform"
-        Contact_Person: "Aman Makwana"
     }
 }
 
