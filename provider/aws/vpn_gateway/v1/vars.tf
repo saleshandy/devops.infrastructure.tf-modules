@@ -7,7 +7,7 @@ variable "tags" {
   description = "A map of tags to assign to the VPN Gateway."
   type        = map(string)
   default = {
-    Name = "main"
+    Author : "Terraform"
   }
 }
 
