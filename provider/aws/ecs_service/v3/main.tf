@@ -49,6 +49,8 @@ resource "aws_ecs_service" "main" {
   propagate_tags = var.propagate_tags
 
   lifecycle {
-    ignore_changes = var.lifecycle_ignore_changes
+    ignore_changes = [
+      "desired_count"
+    ]
   }
 }
