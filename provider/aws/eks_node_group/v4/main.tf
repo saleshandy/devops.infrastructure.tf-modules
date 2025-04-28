@@ -112,8 +112,6 @@ data "aws_autoscaling_groups" "eks_asgs" {
   depends_on = [aws_eks_node_group.main]
 }
 
-data "aws_region" "current" {}
-
 resource "null_resource" "asg_tags" {
   depends_on = [aws_eks_node_group.main]
 
@@ -124,7 +122,7 @@ resource "null_resource" "asg_tags" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      AWS_REGION=$(terraform output -raw aws_region || echo "${data.aws_region.current.name}")
+      AWS_REGION="${var.aws_region}"
       
       if [ -z "$AWS_REGION" ]; then
         AWS_REGION="${data.aws_region.current.name}"
