@@ -112,26 +112,22 @@ data "aws_autoscaling_groups" "eks_asgs" {
   depends_on = [aws_eks_node_group.main]
 }
 
-resource "aws_autoscaling_group_tag" "multiple_tags" {
+resource "null_resource" "asg_tags" {
   depends_on = [aws_eks_node_group.main]
 
-  for_each = merge([
-    for asg_name in data.aws_autoscaling_groups.eks_asgs.names : 
-      {
-        for key, value in var.tags : "${asg_name}-${key}" => {
-          asg_name  = asg_name
-          tag_key   = key
-          tag_value = value
-        }
-      }
-    if contains(asg_name, var.node_group_name)
-  ]...)
+  triggers = {
+    node_group_name = var.node_group_name
+    tags_hash       = jsonencode(var.tags)
+  }
 
-  autoscaling_group_name = each.value.asg_name
-  
-  tag {
-    key                 = each.value.tag_key
-    value               = each.value.tag_value
-    propagate_at_launch = true
+  provisioner "local-exec" {
+    command = <<-EOT
+      ASG_NAMES=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Key=='eks:nodegroup-name'].Value, '${var.node_group_name}')].AutoScalingGroupName" --output text)
+      
+      for ASG_NAME in $ASG_NAMES; do
+        echo "Tagging ASG: $ASG_NAME"
+        ${join("\n        ", [for key, value in var.tags : "aws autoscaling create-or-update-tags --tags ResourceId=$ASG_NAME,ResourceType=auto-scaling-group,Key='${key}',Value='${value}',PropagateAtLaunch=true"])}
+      done
+    EOT
   }
 }
