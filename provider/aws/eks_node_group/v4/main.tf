@@ -112,6 +112,8 @@ data "aws_autoscaling_groups" "eks_asgs" {
   depends_on = [aws_eks_node_group.main]
 }
 
+data "aws_region" "current" {}
+
 resource "null_resource" "asg_tags" {
   depends_on = [aws_eks_node_group.main]
 
