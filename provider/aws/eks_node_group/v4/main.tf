@@ -115,23 +115,23 @@ data "aws_autoscaling_groups" "eks_asgs" {
 resource "aws_autoscaling_group_tag" "multiple_tags" {
   depends_on = [aws_eks_node_group.main]
 
-  for_each = {
+  for_each = merge([
     for asg_name in data.aws_autoscaling_groups.eks_asgs.names : 
-    for key, value in var.tags : 
-    "${asg_name}-${key}" => {
-      asg_name  = asg_name
-      tag_key   = key
-      tag_value = value
-    }
+      {
+        for key, value in var.tags : "${asg_name}-${key}" => {
+          asg_name  = asg_name
+          tag_key   = key
+          tag_value = value
+        }
+      }
     if contains(asg_name, var.node_group_name)
-  }
+  ]...)
 
   autoscaling_group_name = each.value.asg_name
-
+  
   tag {
     key                 = each.value.tag_key
     value               = each.value.tag_value
     propagate_at_launch = true
   }
 }
-
