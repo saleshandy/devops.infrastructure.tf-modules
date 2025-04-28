@@ -124,7 +124,7 @@ resource "null_resource" "asg_tags" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      AWS_REGION="${var.aws_region}"
+      AWS_REGION="${data.aws_region.current.name}"
 
       if [ -z "$AWS_REGION" ]; then
         AWS_REGION="${data.aws_region.current.name}"
