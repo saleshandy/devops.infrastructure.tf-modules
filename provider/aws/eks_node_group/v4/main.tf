@@ -123,9 +123,9 @@ resource "null_resource" "asg_tags" {
   provisioner "local-exec" {
     command = <<-EOT
       AWS_REGION="${var.aws_region}"
-      
+
       if [ -z "$AWS_REGION" ]; then
-        AWS_REGION="${data.aws_region.current.name}"
+        AWS_REGION="${var.aws_region}"
       fi
       
       # Get all ASGs with the node group name in them
