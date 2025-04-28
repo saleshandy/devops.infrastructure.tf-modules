@@ -122,11 +122,18 @@ resource "null_resource" "asg_tags" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      ASG_NAMES=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Key=='eks:nodegroup-name'].Value, '${var.node_group_name}')].AutoScalingGroupName" --output text)
+      AWS_REGION=$(terraform output -raw aws_region || echo "${data.aws_region.current.name}")
+      
+      if [ -z "$AWS_REGION" ]; then
+        AWS_REGION="${data.aws_region.current.name}"
+      fi
+      
+      # Get all ASGs with the node group name in them
+      ASG_NAMES=$(aws autoscaling describe-auto-scaling-groups --region $AWS_REGION --query "AutoScalingGroups[?contains(Tags[?Key=='eks:nodegroup-name'].Value, '${var.node_group_name}')].AutoScalingGroupName" --output text)
       
       for ASG_NAME in $ASG_NAMES; do
         echo "Tagging ASG: $ASG_NAME"
-        ${join("\n        ", [for key, value in var.tags : "aws autoscaling create-or-update-tags --tags ResourceId=$ASG_NAME,ResourceType=auto-scaling-group,Key='${key}',Value='${value}',PropagateAtLaunch=true"])}
+        ${join("\n        ", [for key, value in var.tags : "aws autoscaling create-or-update-tags --region $AWS_REGION --tags ResourceId=$ASG_NAME,ResourceType=auto-scaling-group,Key='${key}',Value='${value}',PropagateAtLaunch=true"])}
       done
     EOT
   }
