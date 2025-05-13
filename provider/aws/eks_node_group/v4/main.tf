@@ -108,29 +108,35 @@ resource "aws_eks_addon" "aws_guardduty_agent" {
   addon_version               = var.addon_aws_guardduty_agent_version
 }
 
-resource "aws_autoscaling_group_tag" "multiple_tags" {
+data "aws_autoscaling_groups" "eks_asgs" {
+  depends_on = [aws_eks_node_group.main]
+}
+
+data "aws_region" "current" {}
+
+resource "null_resource" "asg_tags" {
   depends_on = [aws_eks_node_group.main]
 
-  # Create a resource for each combination of ASG and tag
-  for_each = {
-    for pair in flatten([
-      for asg in flatten([
-        for resources in aws_eks_node_group.main.resources : resources.autoscaling_groups
-      ]) : [
-        for key, value in var.tags : {
-          asg_name = asg.name
-          tag_key  = key
-          tag_value = value
-        }
-      ]
-    ]) : "${pair.asg_name}-${pair.tag_key}" => pair
+  triggers = {
+    node_group_name = var.node_group_name
+    tags_hash       = jsonencode(var.tags)
   }
 
-  autoscaling_group_name = each.value.asg_name
+  provisioner "local-exec" {
+    command = <<-EOT
+      AWS_REGION="${data.aws_region.current.name}"
 
-  tag {
-    key                 = each.value.tag_key
-    value               = each.value.tag_value
-    propagate_at_launch = true
+      if [ -z "$AWS_REGION" ]; then
+        AWS_REGION="${data.aws_region.current.name}"
+      fi
+      
+      # Get all ASGs with the node group name in them
+      ASG_NAMES=$(aws autoscaling describe-auto-scaling-groups --region $AWS_REGION --query "AutoScalingGroups[?contains(Tags[?Key=='eks:nodegroup-name'].Value, '${var.node_group_name}')].AutoScalingGroupName" --output text)
+      
+      for ASG_NAME in $ASG_NAMES; do
+        echo "Tagging ASG: $ASG_NAME"
+        ${join("\n        ", [for key, value in var.tags : "aws autoscaling create-or-update-tags --region $AWS_REGION --tags ResourceId=$ASG_NAME,ResourceType=auto-scaling-group,Key='${key}',Value='${value}',PropagateAtLaunch=true"])}
+      done
+    EOT
   }
 }
