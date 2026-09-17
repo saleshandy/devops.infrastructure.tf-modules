@@ -47,6 +47,12 @@ variable "disk_size" {
   default     = 20
 }
 
+variable "kms_key_id" {
+  type        = string
+  description = "ARN of the KMS key used to encrypt the root volume. Null uses the account's default EBS key"
+  default     = null
+}
+
 variable "desired_size" {
   type    = number
   default = 2

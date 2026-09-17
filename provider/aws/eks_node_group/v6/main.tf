@@ -12,6 +12,7 @@ resource "aws_launch_template" "main" {
       volume_size           = var.disk_size
       volume_type           = "gp3"
       encrypted             = true
+      kms_key_id            = var.kms_key_id
       delete_on_termination = true
     }
   }
