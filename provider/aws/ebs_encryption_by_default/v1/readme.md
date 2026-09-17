@@ -56,7 +56,16 @@ module "example_ebs_kms_key" {
 
 module "example_ebs_encryption_by_default" {
   source      = "github.com/saleshandy/devops.infrastructure.tf-modules/provider/aws/ebs_encryption_by_default/v1"
-  kms_key_arn = module.example_ebs_kms_key.kms_key_arn # Optional, default: AWS-managed aws/ebs key
+  kms_key_arn = module.example_ebs_kms_key.kms_key_arn # Required unless use_aws_managed_key = true
+}
+```
+
+To encrypt by default with the AWS-managed `aws/ebs` key instead:
+
+```
+module "example_ebs_encryption_by_default" {
+  source              = "github.com/saleshandy/devops.infrastructure.tf-modules/provider/aws/ebs_encryption_by_default/v1"
+  use_aws_managed_key = true
 }
 ```
 
