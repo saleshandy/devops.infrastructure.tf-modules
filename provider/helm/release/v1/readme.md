@@ -21,7 +21,7 @@ provider "helm" {
 }
 
 module "example_aws_load_balancer_controller" {
-  source        = "github.com/saleshandy/devops.infrastructure.tf-modules/provider/aws/helm_release/v1"
+  source        = "github.com/saleshandy/devops.infrastructure.tf-modules/provider/helm/release/v1"
   name          = "aws-load-balancer-controller"
   namespace     = "kube-system"
   repository    = "https://aws.github.io/eks-charts"
