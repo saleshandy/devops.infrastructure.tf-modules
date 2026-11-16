@@ -152,7 +152,11 @@ data "aws_autoscaling_groups" "eks_asgs" {
   depends_on = [aws_eks_node_group.main]
 }
 
-data "aws_region" "current" {}
+# Region taken from the node group ARN (arn:aws:eks:<region>:...) instead of data.aws_region:
+# its "name" attribute is deprecated in AWS provider 6.x and "region" doesn't exist in 5.x.
+locals {
+  node_group_region = split(":", aws_eks_node_group.main.arn)[3]
+}
 
 resource "null_resource" "asg_tags" {
   depends_on = [aws_eks_node_group.main]
@@ -164,10 +168,10 @@ resource "null_resource" "asg_tags" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      AWS_REGION="${data.aws_region.current.name}"
+      AWS_REGION="${local.node_group_region}"
 
       if [ -z "$AWS_REGION" ]; then
-        AWS_REGION="${data.aws_region.current.name}"
+        AWS_REGION="${local.node_group_region}"
       fi
       
       # Get all ASGs with the node group name in them
